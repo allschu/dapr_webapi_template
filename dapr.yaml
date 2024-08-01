@@ -1,0 +1,14 @@
+version: 1
+apps:
+  - appDirPath: ./dapr_webapi_template_api_gateway/
+    appID: gateway # This is the ID used to identify your application in service discovery
+    appPort: 5057 # This is the port your application listens on and Dapr will send traffic to
+    command: ["dotnet", "run"]
+  - appDirPath: ./dapr_webapi_template_api1/
+    appID: villains # This is the ID used to identify your application in service discovery
+    appPort: 8080 # This is the port your application listens on and Dapr will send traffic to
+    command: ["dotnet", "run"]
+  - appID: heroes # This is the ID used to identify your application in service discovery
+    appDirPath: ./dapr_webapi_template_api2/
+    appPort: 8081 # This is the port your application listens on and Dapr will send traffic to
+    command: ["dotnet", "run"]

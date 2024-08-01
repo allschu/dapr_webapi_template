@@ -1,0 +1,6 @@
+@dapr_webapi_template_HostAddress = http://localhost:5063
+
+GET {{dapr_webapi_template_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
