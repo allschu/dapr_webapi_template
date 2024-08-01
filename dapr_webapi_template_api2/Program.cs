@@ -5,7 +5,7 @@ namespace dapr_webapi_template_api2
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.WebHost.UseUrls("http://0.0.0.0:8081");
+            builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
             // Add services to the container.
             builder.Services.AddAuthorization();

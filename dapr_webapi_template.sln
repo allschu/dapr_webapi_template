@@ -9,15 +9,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dapr_webapi_template_client
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dapr_webapi_template_client.Client", "dapr_webapi_template_client\dapr_webapi_template_client.Client\dapr_webapi_template_client.Client.csproj", "{F1849004-5D50-45DA-B70F-885BEB60BE64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dapr_webapi_template_api2", "dapr_webapi_template_api2\dapr_webapi_template_api2.csproj", "{3D7EC0D1-B5DD-4B09-BAFC-1D934B38457B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dapr_webapi_template_api2", "dapr_webapi_template_api2\dapr_webapi_template_api2.csproj", "{3D7EC0D1-B5DD-4B09-BAFC-1D934B38457B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E5948B02-672C-4B9D-AACB-EA9A594B2969}"
 	ProjectSection(SolutionItems) = preProject
 		dapr.yaml = dapr.yaml
+		deployment.yaml = deployment.yaml
 		ReadMe.md = ReadMe.md
+		prometheus.yml = prometheus.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dapr_webapi_template_api_gateway", "dapr_webapi_template_api_gateway\dapr_webapi_template_api_gateway.csproj", "{BC25D83D-8DBF-4126-A755-27360A4C7D15}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dapr_webapi_template_api_gateway", "dapr_webapi_template_api_gateway\dapr_webapi_template_api_gateway.csproj", "{BC25D83D-8DBF-4126-A755-27360A4C7D15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

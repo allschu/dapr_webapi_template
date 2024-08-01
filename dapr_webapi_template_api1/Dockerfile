@@ -9,17 +9,17 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["dapr_webapi_template/dapr_webapi_template.csproj", "dapr_webapi_template/"]
-RUN dotnet restore "./dapr_webapi_template/dapr_webapi_template.csproj"
+COPY ["dapr_webapi_template_api1/dapr_webapi_template_api1.csproj", "dapr_webapi_template_api1/"]
+RUN dotnet restore "./dapr_webapi_template_api1/dapr_webapi_template_api1.csproj"
 COPY . .
-WORKDIR "/src/dapr_webapi_template"
-RUN dotnet build "./dapr_webapi_template.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/dapr_webapi_template_api1"
+RUN dotnet build "./dapr_webapi_template_api1.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./dapr_webapi_template.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./dapr_webapi_template_api1.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "dapr_webapi_template.dll"]
+ENTRYPOINT ["dotnet", "dapr_webapi_template_api1.dll"]

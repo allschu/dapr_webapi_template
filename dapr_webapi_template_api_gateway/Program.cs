@@ -1,5 +1,7 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 using Serilog;
 
 namespace dapr_webapi_template_api_gateway
@@ -21,8 +23,26 @@ namespace dapr_webapi_template_api_gateway
 
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Host.UseSerilog();
+            builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
+            var otelSetup = builder.Services.AddOpenTelemetry();
+            otelSetup.WithMetrics(providerBuilder =>
+            {
+                providerBuilder.AddMeter(typeof(Program).Assembly.GetName().Name);
+                providerBuilder.AddMeter("Microsoft.AspNetCore.Hosting");
+                providerBuilder.AddMeter("Microsoft.AspNetCore.Server.Kestrel");
+                providerBuilder.AddPrometheusExporter();
+            });
+
+            otelSetup.WithTracing(config =>
+            {
+                config.AddAspNetCoreInstrumentation();
+                config.AddHttpClientInstrumentation();
+                config.AddOtlpExporter();
+            });
+
+            builder.Host.UseSerilog();
+            
             // Add services to the container.
             builder.Services.AddAuthorization();
             
@@ -47,6 +67,8 @@ namespace dapr_webapi_template_api_gateway
 
             app.UseFastEndpoints()
                .UseSwaggerGen();
+
+            app.MapPrometheusScrapingEndpoint();
 
             app.Run();
         }
