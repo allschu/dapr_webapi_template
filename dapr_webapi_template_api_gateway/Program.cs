@@ -22,7 +22,7 @@ namespace dapr_webapi_template_api_gateway
             builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
 
-          
+
             var otelSetup = builder.Services.AddOpenTelemetry();
             otelSetup.WithMetrics(providerBuilder =>
             {
@@ -30,8 +30,9 @@ namespace dapr_webapi_template_api_gateway
                 providerBuilder.AddMeter("Microsoft.AspNetCore.Hosting");
                 providerBuilder.AddMeter("Microsoft.AspNetCore.Server.Kestrel");
                 providerBuilder.AddPrometheusExporter();
+                providerBuilder.AddOtlpExporter();
             });
-         
+
             otelSetup.WithTracing(config =>
             {
                 config.AddAspNetCoreInstrumentation();
@@ -47,10 +48,10 @@ namespace dapr_webapi_template_api_gateway
                     options.ParseStateValues = true;
                     options.IncludeFormattedMessage = true;
                     options.AddOtlpExporter();
-                    options.AddConsoleExporter()
-                        .SetResourceBuilder(
-                            ResourceBuilder.CreateDefault()
-                                .AddService(typeof(Program).Assembly.GetName().Name));
+                    // options.AddConsoleExporter()
+                    //     .SetResourceBuilder(
+                    //         ResourceBuilder.CreateDefault()
+                    //             .AddService(typeof(Program).Assembly.GetName().Name));
                 });
             });
 
@@ -68,7 +69,16 @@ namespace dapr_webapi_template_api_gateway
                     };
                 });
 
-            builder.Services.AddDaprClient();
+            //builder.Services.AddDaprClient();
+            builder.Services.AddHttpClient("Heroes", httpClient =>
+            {
+                httpClient.BaseAddress = new Uri("http://api2-service.default.svc.cluster.local:8083/");
+            });
+
+            builder.Services.AddHttpClient("Villains", httpClient =>
+            {
+                httpClient.BaseAddress = new Uri("http://api1-service.default.svc.cluster.local:8082/");
+            });
 
             var app = builder.Build();
 

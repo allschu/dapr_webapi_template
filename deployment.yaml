@@ -1,6 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: redhat-deployment
+  labels:
+    app: redhat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redhat
+  template:
+    metadata:
+      labels:
+        app: redhat
+    spec:
+      containers:
+        - name: redhat
+          image: redhat/ubi8
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: webapi-gateway-deployment
   labels:
     app: gateway
@@ -13,16 +33,10 @@ spec:
     metadata:
       labels:
         app: gateway
-      annotations:
-        dapr.io/enabled: "true"
-        dapr.io/app-id: "gateway"
-        dapr.io/app-port: "8080"
-        dapr.io/config: "tracing"
-        dapr.io/enable-api-logging: "true"
     spec:
       containers:
       - name: gateway
-        image: daprwebapitemplateapigateway
+        image: gateway
         imagePullPolicy: Never #when using local images always use Never
         ports:
         - containerPort: 8080
@@ -42,16 +56,10 @@ spec:
     metadata:
       labels:
         app: api1
-      annotations:
-        dapr.io/enabled: "true"
-        dapr.io/app-id: "villains"
-        dapr.io/app-port: "8080"
-        dapr.io/config: "tracing"
-        dapr.io/enable-api-logging: "true"
     spec:
       containers:
       - name: api1
-        image: daprwebapitemplateapi1
+        image: api1
         imagePullPolicy: Never #when using local images always use Never
         ports:
         - containerPort: 8080
@@ -71,16 +79,10 @@ spec:
     metadata:
       labels:
         app: api2
-      annotations:
-        dapr.io/enabled: "true"
-        dapr.io/app-id: "heroes"
-        dapr.io/app-port: "8080"
-        dapr.io/config: "tracing"
-        dapr.io/enable-api-logging: "true"
     spec:
       containers:
       - name: api2
-        image: daprwebapitemplateapi2
+        image: api2
         imagePullPolicy: Never #when using local images always use Never
         ports:
         - containerPort: 8080
