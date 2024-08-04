@@ -28,7 +28,52 @@ see example
 curl http://localhost:55067/v1.0/invoke/heroes/method/heroes/
 ```
 
+### Install Dapr
+
+install dapr on your kubernetes cluster
+
+```
+dapr init -k
+```
 
 
-for more information about Dapr, please visit: https://dapr.io/
+## Implement Prometheus and Grafana with the following
+
+### Install Prometheus
+
+```
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install dapr-prom prometheus-community/prometheus
+```
+
+
+Ensure Prometheus is running in your cluster.
+
+https://docs.dapr.io/operations/observability/metrics/prometheus/
+
+
+### Install Grafana
+
+Make sure that prometheus is installed according to the above
+
+Add grafana to your Helm repo
+
+```
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+```
+
+Install grafana
+
+```
+helm install grafana grafana/grafana
+```
+
+
+https://docs.dapr.io/operations/observability/metrics/grafana/
+
+
+for more information about Dapr, please visit: 
+https://dapr.io/
 https://github.com/dapr/quickstarts/tree/master/service_invocation/csharp/http

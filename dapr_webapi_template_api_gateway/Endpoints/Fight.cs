@@ -3,7 +3,7 @@ using FastEndpoints;
 
 namespace dapr_webapi_template_api_gateway.Endpoints
 {
-    public class Fight(DaprClient daprClient) : EndpointWithoutRequest<FightResponse>
+    public class Fight(DaprClient daprClient, ILogger<Fight> logger) : EndpointWithoutRequest<FightResponse>
     {
         public override void Configure()
         {
@@ -13,6 +13,7 @@ namespace dapr_webapi_template_api_gateway.Endpoints
 
         public override async Task<FightResponse> HandleAsync(CancellationToken cancellationToken)
         {
+            logger.LogInformation("Fight is called");
 
             var heroTask = daprClient.InvokeMethodAsync<Character>(System.Net.Http.HttpMethod.Get, Constants.HeroApi, "heroes", cancellationToken);
             var villainTask = daprClient.InvokeMethodAsync<Character>(System.Net.Http.HttpMethod.Get, Constants.VillainApi, "villains", cancellationToken);

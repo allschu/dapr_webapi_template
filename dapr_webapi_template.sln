@@ -15,8 +15,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		dapr.yaml = dapr.yaml
 		deployment.yaml = deployment.yaml
-		ReadMe.md = ReadMe.md
+		grafana.yaml = grafana.yaml
+		jeager-deployment.yaml = jeager-deployment.yaml
+		open-telemetry-collector-config.yaml = open-telemetry-collector-config.yaml
+		open-telemetry-collector.yaml = open-telemetry-collector.yaml
 		prometheus.yml = prometheus.yml
+		prometheus_config.yaml = prometheus_config.yaml
+		prometheus_deployment.yaml = prometheus_deployment.yaml
+		prometheus_rbac.yaml = prometheus_rbac.yaml
+		ReadMe.md = ReadMe.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dapr_webapi_template_api_gateway", "dapr_webapi_template_api_gateway\dapr_webapi_template_api_gateway.csproj", "{BC25D83D-8DBF-4126-A755-27360A4C7D15}"

@@ -1,8 +1,9 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Serilog;
 
 namespace dapr_webapi_template_api_gateway
 {
@@ -16,15 +17,12 @@ namespace dapr_webapi_template_api_gateway
                 .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", true)
                 .Build();
 
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(configuration)
-                .CreateLogger();
-
-
             var builder = WebApplication.CreateBuilder(args);
 
             builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
+
+          
             var otelSetup = builder.Services.AddOpenTelemetry();
             otelSetup.WithMetrics(providerBuilder =>
             {
@@ -33,7 +31,7 @@ namespace dapr_webapi_template_api_gateway
                 providerBuilder.AddMeter("Microsoft.AspNetCore.Server.Kestrel");
                 providerBuilder.AddPrometheusExporter();
             });
-
+         
             otelSetup.WithTracing(config =>
             {
                 config.AddAspNetCoreInstrumentation();
@@ -41,11 +39,25 @@ namespace dapr_webapi_template_api_gateway
                 config.AddOtlpExporter();
             });
 
-            builder.Host.UseSerilog();
-            
+            builder.Services.AddLogging(configure =>
+            {
+                configure.AddOpenTelemetry(options =>
+                {
+                    options.IncludeScopes = true;
+                    options.ParseStateValues = true;
+                    options.IncludeFormattedMessage = true;
+                    options.AddOtlpExporter();
+                    options.AddConsoleExporter()
+                        .SetResourceBuilder(
+                            ResourceBuilder.CreateDefault()
+                                .AddService(typeof(Program).Assembly.GetName().Name));
+                });
+            });
+
+
             // Add services to the container.
             builder.Services.AddAuthorization();
-            
+
             builder.Services
                 .AddFastEndpoints()
                 .SwaggerDocument(options =>

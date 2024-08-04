@@ -17,6 +17,8 @@ spec:
         dapr.io/enabled: "true"
         dapr.io/app-id: "gateway"
         dapr.io/app-port: "8080"
+        dapr.io/config: "tracing"
+        dapr.io/enable-api-logging: "true"
     spec:
       containers:
       - name: gateway
@@ -44,6 +46,8 @@ spec:
         dapr.io/enabled: "true"
         dapr.io/app-id: "villains"
         dapr.io/app-port: "8080"
+        dapr.io/config: "tracing"
+        dapr.io/enable-api-logging: "true"
     spec:
       containers:
       - name: api1
@@ -71,6 +75,8 @@ spec:
         dapr.io/enabled: "true"
         dapr.io/app-id: "heroes"
         dapr.io/app-port: "8080"
+        dapr.io/config: "tracing"
+        dapr.io/enable-api-logging: "true"
     spec:
       containers:
       - name: api2

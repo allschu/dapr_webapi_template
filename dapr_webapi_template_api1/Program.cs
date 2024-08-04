@@ -1,3 +1,7 @@
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+
 namespace dapr_webapi_template_api1
 {
     public class Program
@@ -11,6 +15,37 @@ namespace dapr_webapi_template_api1
             // Add services to the container.
             builder.Services.AddAuthorization();
 
+            builder.Services.AddLogging(configure =>
+            {
+                configure.AddOpenTelemetry(options =>
+                {
+                    options.IncludeScopes = true;
+                    options.ParseStateValues = true;
+                    options.IncludeFormattedMessage = true;
+                    options.AddOtlpExporter();
+                });
+            });
+
+            var otelSetup = builder.Services.AddOpenTelemetry();
+
+            otelSetup.WithMetrics(providerBuilder =>
+            {
+                providerBuilder.AddMeter(typeof(Program).Assembly.GetName().Name);
+                providerBuilder.AddMeter("Microsoft.AspNetCore.Hosting");
+                providerBuilder.AddMeter("Microsoft.AspNetCore.Server.Kestrel");
+                providerBuilder.AddPrometheusExporter();
+            });
+            otelSetup.WithLogging(logConfig =>
+            {
+                logConfig.AddOtlpExporter();
+            });
+
+            otelSetup.WithTracing(config =>
+            {
+                config.AddAspNetCoreInstrumentation();
+                config.AddHttpClientInstrumentation();
+                config.AddOtlpExporter();
+            });
 
             var app = builder.Build();
             
@@ -25,8 +60,9 @@ namespace dapr_webapi_template_api1
                 "Bane", "Black Mask", "Clayface", "Deadshot", "Hush", "Joker", "Balmy", "Hot", "Sweltering", "Scorching"
             };
 
-            app.MapGet("/villains", (HttpContext httpContext) =>
+            app.MapGet("/villains", (HttpContext httpContext, ILogger<Program> logger) =>
             {
+                logger.LogInformation("Getting villains");
                 var forecast = Enumerable.Range(1, 5).Select(index =>
                     new Villain
                     {
