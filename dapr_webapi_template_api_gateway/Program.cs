@@ -30,31 +30,53 @@ namespace dapr_webapi_template_api_gateway
                 providerBuilder.AddMeter("Microsoft.AspNetCore.Hosting");
                 providerBuilder.AddMeter("Microsoft.AspNetCore.Server.Kestrel");
                 providerBuilder.AddPrometheusExporter();
-                providerBuilder.AddOtlpExporter();
+                providerBuilder.AddOtlpExporter(o =>
+                {
+                    o.Endpoint = new Uri("http://otel-collector.default.svc.cluster.local:4317");
+                }).SetResourceBuilder(
+                    ResourceBuilder.CreateDefault()
+                        .AddService(typeof(Program).Assembly.GetName().Name));
             });
 
             otelSetup.WithTracing(config =>
             {
                 config.AddAspNetCoreInstrumentation();
                 config.AddHttpClientInstrumentation();
-                config.AddOtlpExporter();
+                config.AddOtlpExporter(o =>
+                {
+                    o.Endpoint = new Uri("http://otel-collector.default.svc.cluster.local:4317");
+                }).SetResourceBuilder(
+                    ResourceBuilder.CreateDefault()
+                        .AddService(typeof(Program).Assembly.GetName().Name));
             });
 
-            builder.Services.AddLogging(configure =>
+            otelSetup.WithLogging(config =>
             {
-                configure.AddOpenTelemetry(options =>
+                config.AddOtlpExporter(o =>
+                {
+                    o.Endpoint = new Uri("http://otel-collector.default.svc.cluster.local:4317");
+                }).SetResourceBuilder(
+                    ResourceBuilder.CreateDefault()
+                        .AddService(typeof(Program).Assembly.GetName().Name));
+            });
+
+            builder.Services.AddLogging(config =>
+            {
+                config.AddOpenTelemetry(options =>
                 {
                     options.IncludeScopes = true;
                     options.ParseStateValues = true;
                     options.IncludeFormattedMessage = true;
-                    options.AddOtlpExporter();
-                    // options.AddConsoleExporter()
-                    //     .SetResourceBuilder(
-                    //         ResourceBuilder.CreateDefault()
-                    //             .AddService(typeof(Program).Assembly.GetName().Name));
+                    options.AddOtlpExporter(o =>
+                    {
+                        o.Endpoint = new Uri("http://otel-collector.default.svc.cluster.local:4317");
+                    }).SetResourceBuilder(
+                        ResourceBuilder.CreateDefault()
+                            .AddService(typeof(Program).Assembly.GetName().Name));
                 });
-            });
 
+
+            });
 
             // Add services to the container.
             builder.Services.AddAuthorization();

@@ -1,3 +1,28 @@
+apiVersion: jaegertracing.io/v1
+kind: "Jaeger"
+metadata:
+  name: jaeger
+spec:
+  strategy: allInOne
+  ingress:
+    enabled: false
+  allInOne:
+    image: jaegertracing/all-in-one:1.22
+    options:
+      query:
+        base-path: /jaeger
+---
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: tracing
+  namespace: default
+spec:
+  tracing:
+    samplingRate: "1"
+    zipkin:
+      endpointAddress: "http://zipkin.default.svc.cluster.local:9411/api/v2/spans"
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -12,12 +37,6 @@ data:
         protocols:
           grpc:
             endpoint: 0.0.0.0:4317
-          http:
-            cors:
-                allowed_origins:
-                - http://*
-                - https://*
-            endpoint:  0.0.0.0:4318
     extensions:
       health_check:
       pprof:
@@ -25,12 +44,8 @@ data:
       zpages:
         endpoint: :55679
     exporters:
-      googlecloud:
-        log:
-
-            default_log_name: opentelemetry-collector
-      debug:
-        verbosity: detailed  # Options: basic, normal, detailed
+      logging:
+        loglevel: debug
       # Depending on where you want to export your trace, use the
       # correct OpenTelemetry trace exporter here.
       #
@@ -40,34 +55,17 @@ data:
       # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter
       # for full lists of trace exporters that you can use, and how to
       # configure them.
-      otlp:
-       endpoint: "10.101.228.8:4317"
-       tls:
-         insecure: true
-    processors:
-        filter/self-metrics:
-            metrics:
-                include:
-                    match_type: strict
-                    metric_names:
-                    - otelcol_process_uptime
-                    - otelcol_process_memory_rss
-                    - otelcol_grpc_io_client_completed_rpcs
-                    - otelcol_googlecloudmonitoring_point_count
-        batch:
-            send_batch_max_size: 200
-            send_batch_size: 200
-            timeout: 5s
+      otlp/jaeger:
+        endpoint: "jaeger-collector.observability.svc.cluster.local:4317"
+        tls:
+          insecure: true
     service:
       extensions: [pprof, zpages, health_check]
       pipelines:
         traces:
           receivers: [otlp]
           # List your exporter here.
-          exporters: [otlp, debug, googlecloud]
-        logs:
-          receivers: [otlp]
-          exporters: [debug, googlecloud]
+          exporters: [otlp/jaeger,logging]
 ---
 apiVersion: v1
 kind: Service
@@ -103,7 +101,6 @@ spec:
         app: opentelemetry
         component: otel-collector
     spec:
-      serviceAccountName: workloadserviceaccount
       containers:
       - name: otel-collector
         image: otel/opentelemetry-collector-contrib-dev:latest
@@ -122,6 +119,14 @@ spec:
         volumeMounts:
           - name: otel-collector-config-vol
             mountPath: /conf
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 13133
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 13133
       volumes:
         - configMap:
             name: otel-collector-conf

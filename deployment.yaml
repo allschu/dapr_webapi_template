@@ -1,26 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: redhat-deployment
-  labels:
-    app: redhat
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: redhat
-  template:
-    metadata:
-      labels:
-        app: redhat
-    spec:
-      containers:
-        - name: redhat
-          image: redhat/ubi8
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: webapi-gateway-deployment
   labels:
     app: gateway
@@ -36,7 +16,7 @@ spec:
     spec:
       containers:
       - name: gateway
-        image: gateway
+        image: daprwebapitemplateapigateway
         imagePullPolicy: Never #when using local images always use Never
         ports:
         - containerPort: 8080
@@ -59,7 +39,7 @@ spec:
     spec:
       containers:
       - name: api1
-        image: api1
+        image: daprwebapitemplateapi1
         imagePullPolicy: Never #when using local images always use Never
         ports:
         - containerPort: 8080
@@ -82,7 +62,7 @@ spec:
     spec:
       containers:
       - name: api2
-        image: api2
+        image: daprwebapitemplateapi2
         imagePullPolicy: Never #when using local images always use Never
         ports:
         - containerPort: 8080

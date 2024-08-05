@@ -73,6 +73,14 @@ helm install grafana grafana/grafana
 
 https://docs.dapr.io/operations/observability/metrics/grafana/
 
+## Install Jeager opertator
+
+```
+kubectl create namespace observability
+kubectl create -f https://github.com/jaegertracing/jaeger-operator/releases/download/v1.57.0/jaeger-operator.yaml -n observability
+```
+
+
 
 for more information about Dapr, please visit: 
 https://dapr.io/
