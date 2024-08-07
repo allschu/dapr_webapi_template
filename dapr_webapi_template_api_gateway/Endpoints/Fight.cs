@@ -1,10 +1,13 @@
 ﻿using Dapr.Client;
 using FastEndpoints;
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
 
 namespace dapr_webapi_template_api_gateway.Endpoints
 {
-    public class Fight(IHttpClientFactory factory, ILogger<Fight> logger) : EndpointWithoutRequest<FightResponse>
+    public class Fight(IHttpClientFactory factory, ILogger<Fight> logger, ActivitySource activitySource) : EndpointWithoutRequest<FightResponse>
     {
+
         public override void Configure()
         {
             Get("fight");
@@ -15,28 +18,32 @@ namespace dapr_webapi_template_api_gateway.Endpoints
         {
             logger.LogInformation("Fight is called");
 
-            var httpHeroesClient = factory.CreateClient("Heroes");
-            var httpVillainsClient = factory.CreateClient("Villains");
-
-            var heroTask = httpHeroesClient.GetFromJsonAsync<Character>("heroes", cancellationToken);
-            var villainTask = httpVillainsClient.GetFromJsonAsync<Character>("villains", cancellationToken);
-
-            //var heroTask = daprClient.InvokeMethodAsync<Character>(System.Net.Http.HttpMethod.Get, Constants.HeroApi, "heroes", cancellationToken);
-            //var villainTask = daprClient.InvokeMethodAsync<Character>(System.Net.Http.HttpMethod.Get, Constants.VillainApi, "villains", cancellationToken);
-
-            await Task.WhenAll(heroTask, villainTask);
-
-            var heroResponse = await heroTask;
-            var villainResponse = await villainTask;
-
-            
-            Response = new FightResponse
+            using (var activity = activitySource.StartActivity("FightOperation"))
             {
-                HeroName = heroResponse.Name,
-                VillainName = villainResponse.Name
-            };
-            
-            return Response;
+
+                var httpHeroesClient = factory.CreateClient("Heroes");
+                var httpVillainsClient = factory.CreateClient("Villains");
+
+                var heroTask = await httpHeroesClient.GetFromJsonAsync<Character>("heroes", cancellationToken);
+                activity?.SetTag("Hero response", heroTask.Name);
+                
+                var villainTask = await httpVillainsClient.GetFromJsonAsync<Character>("villains", cancellationToken);
+                activity?.SetTag("Villain response", villainTask.Name);
+
+
+                //var heroTask = daprClient.InvokeMethodAsync<Character>(System.Net.Http.HttpMethod.Get, Constants.HeroApi, "heroes", cancellationToken);
+                //var villainTask = daprClient.InvokeMethodAsync<Character>(System.Net.Http.HttpMethod.Get, Constants.VillainApi, "villains", cancellationToken);
+
+                activity?.AddEvent(new ActivityEvent("Send response back"));
+
+                Response = new FightResponse
+                {
+                    HeroName = heroTask.Name,
+                    VillainName = villainTask.Name
+                };
+
+                return Response;
+            }
         }
     }
 

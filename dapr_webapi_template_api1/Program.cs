@@ -1,5 +1,6 @@
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace dapr_webapi_template_api1
@@ -33,18 +34,34 @@ namespace dapr_webapi_template_api1
                 providerBuilder.AddMeter(typeof(Program).Assembly.GetName().Name);
                 providerBuilder.AddMeter("Microsoft.AspNetCore.Hosting");
                 providerBuilder.AddMeter("Microsoft.AspNetCore.Server.Kestrel");
-                providerBuilder.AddPrometheusExporter();
+                providerBuilder.AddOtlpExporter(o =>
+                {
+                    o.Endpoint = new Uri("http://otel-collector.default.svc.cluster.local:4317");
+                }).SetResourceBuilder(
+                    ResourceBuilder.CreateDefault()
+                        .AddService(typeof(Program).Assembly.GetName().Name));
             });
             otelSetup.WithLogging(logConfig =>
             {
-                logConfig.AddOtlpExporter();
+
+                logConfig.AddOtlpExporter(o =>
+                {
+                    o.Endpoint = new Uri("http://otel-collector.default.svc.cluster.local:4317");
+                }).SetResourceBuilder(
+                    ResourceBuilder.CreateDefault()
+                        .AddService(typeof(Program).Assembly.GetName().Name));
             });
 
             otelSetup.WithTracing(config =>
             {
                 config.AddAspNetCoreInstrumentation();
                 config.AddHttpClientInstrumentation();
-                config.AddOtlpExporter();
+                config.AddOtlpExporter(o =>
+                {
+                    o.Endpoint = new Uri("http://otel-collector.default.svc.cluster.local:4317");
+                }).SetResourceBuilder(
+                    ResourceBuilder.CreateDefault()
+                        .AddService(typeof(Program).Assembly.GetName().Name));
             });
 
             var app = builder.Build();
@@ -63,6 +80,7 @@ namespace dapr_webapi_template_api1
             app.MapGet("/villains", (HttpContext httpContext, ILogger<Program> logger) =>
             {
                 logger.LogInformation("Getting villains");
+
                 var forecast = Enumerable.Range(1, 5).Select(index =>
                     new Villain
                     {
